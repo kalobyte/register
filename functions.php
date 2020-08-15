@@ -1,9 +1,22 @@
 <?php
-require_once "db.php";
 
+/**
+ * Проверяет по email, зарегистрирован ли пользователь.@deprecated
+ * @param string email
+ * @return string email, или false если не зарегистрирован
+ */
 function is_registered($email)
 {
-global $pdo;
+    $driver = 'mysql';
+    $host = 'localhost';
+    $db_name = '10lessons';
+    $db_user = '10lessons';
+    $db_password = '10lessons';
+    $charset = 'utf8';
+    $options = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC];
+
+    $dsn = "$driver:host=$host;dbname=$db_name;charset=$charset";
+    $pdo = new PDO($dsn, $db_user, $db_password, $options);
 
     $sql = 'SELECT email FROM register WHERE email = :email';
     $params = [
@@ -15,10 +28,26 @@ global $pdo;
     return $statement->fetchColumn(); // возвращает false, если в базе нет совпадений или значение из таблицы
 }
 
+/**
+ * Добавляет пользователя и пароль в базу, если такого еще нет.
+ * @param string email
+ * @param string password
+ * @return null
+ */
 function add_user($email, $password)
 {
-    global $pdo;
+    $driver = 'mysql';
+    $host = 'localhost';
+    $db_name = '10lessons';
+    $db_user = '10lessons';
+    $db_password = '10lessons';
+    $charset = 'utf8';
+    $options = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC];
 
+    $dsn = "$driver:host=$host;dbname=$db_name;charset=$charset";
+    $pdo = new PDO($dsn, $db_user, $db_password, $options);
+
+    $password = password_hash($password, PASSWORD_DEFAULT);
     $sql = 'INSERT INTO register (email, password) VALUE (:email, :password)';
     $params = [
         ':email'  => $email,
@@ -26,22 +55,48 @@ function add_user($email, $password)
     ];
     $statement = $pdo->prepare($sql);
     $statement->execute($params);
-    //$result = $statement->fetch(PDO::FETCH_ASSOC);
-    //var_dump($result);
-    //return $result;
 }
+
+/**
+ * Добавляет пользователя и пароль в базу, если такого еще нет.
+ * @param string email
+ * @param string password
+ * @return null
+ */
 function check_credentials($email, $password)
 {
-    global $pdo;
-    $sql = 'SELECT email, password FROM register WHERE email = :email AND password = :password';
+    $driver = 'mysql';
+    $host = 'localhost';
+    $db_name = '10lessons';
+    $db_user = '10lessons';
+    $db_password = '10lessons';
+    $charset = 'utf8';
+    $options = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC];
+
+    $dsn = "$driver:host=$host;dbname=$db_name;charset=$charset";
+    $pdo = new PDO($dsn, $db_user, $db_password, $options);
+
+    $sql = 'SELECT * FROM register WHERE email = :email';
     $params = [
         ':email'  => $email,
-        ':password'  => $password,
+        //':password'  => $password,
     ];
 
     $statement = $pdo->prepare($sql);
     $statement->execute($params);
-    return $statement->fetch(); // возвращает false, если в базе нет совпадений или значение из таблицы
+    $result = $statement->fetch(); // возвращает false, если в базе нет совпадений или значение из таблицы
+
+    if ($result["email"] && password_verify($password, $result["password"]))
+    {
+        return [
+            "email" => $result["email"],
+            "id" => $result["id"]
+        ];
+    }
+    else
+    {
+        return false;
+    }
 }
 
 /*
