@@ -5,43 +5,11 @@ require_once "functions.php";
 // если была нажата ссылка logout, то выйтии вернуться на страницу логина опять
 if(isset($_GET["logout"])) logout();
 
-// если просто пришли напрямую на login.php, то не выодить никаких сообщений и вывести форму логина
-// если пришли напрямую на login.php, то покажет сообщение о залогиненом пользователе без формы
+//еслиз алогинен, то перенаправлять  на основную страницу и не показывать ничего на странице логина
+// так упрощаем алгоритм отображения на странице логина и избавляемся от лишней сущности в виде страницы логина,
+// где по идее и не надо ничего отображать, кроме формы входа, а если вошел, то надо направлять сразу на основную страницу
+if(is_logged()) redirect_to("main");
 
-// если введены почта и пароль, то проверка данных и процедура входа, переброска на основной файл main.php
-// если почта или пароль неверные, то вывести  сообщение и снова форму
-// если логин  или пароль пустые, то вывести сообщение и снова форму логина
-if(isset($_POST["email"]) && isset($_POST["password"]))
-{
-    if (!empty($_POST["email"]) && !empty($_POST["password"])) {
-        $result = check_credentials($_POST["email"], $_POST["password"]);
-        if ($result) {
-            set_logged(true);
-            set_flash_message("logged_in", "Залогинен как ".$result["email"]);
-            redirect_to("main");
-        }
-        else
-        {
-            set_flash_message("wrong_login_or_pass", "Логин или пароль неверны");
-        }
-    }
-    else
-    {
-        set_flash_message("empy_login_or_pass", "Пустой логин или пароль");
-    }
-}
-
-/*
-register.php
-status  "already_registered" warning желтый Уведомление! Этот эл. адрес уже занят другим пользователем
-
-
-login.php
-status  "register_success" info  голубой Регистрация успешна
-status "empy_login_or_pass" danger красный Пустой логин или пароль
-status "wrong_login_or_pass" danger  красный Логин или пароль неверны
-status "logged_in" success зеленый залогинен
-*/
 ?>
 
 <!DOCTYPE html>
@@ -79,11 +47,8 @@ status "logged_in" success зеленый залогинен
             </a>
         </div>
         <div class="card p-4 border-top-left-radius-0 border-top-right-radius-0">
-        <?php if(is_logged()) :  ?>
-            <?php display_flash_message();?>
-          <?php else:  ?>
-            <?php display_flash_message();?>
-            <form action="login.php" method="post">
+            <?php display_flash_message();// если неверный логин или пароль ?>
+            <form action="auth.php" method="post">
                 <div class="form-group">
                     <label class="form-label" for="username">Email</label>
                     <input type="email" name="email" id="username" class="form-control" placeholder="Эл. адрес" value="">
@@ -101,9 +66,7 @@ status "logged_in" success зеленый залогинен
                 <button type="submit" class="btn btn-default float-right">Войти</button>
             </form>
         </div>
-        <?php endif ; ?>
-
-
+     
         <div class="blankpage-footer text-center">
             Нет аккаунта? <a href="register.php"><strong>Зарегистрироваться</strong>
         </div>

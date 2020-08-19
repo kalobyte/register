@@ -140,9 +140,14 @@ function display_flash_message()
     }
 }
 
-function set_logged($set)
+function clear_display_message()
 {
-    $_SESSION["logged_in"] = $set;
+    unset($_SESSION["status"]);
+    unset($_SESSION["message"]);
+}
+function set_logged()
+{
+    $_SESSION["logged_in"] = true;
 }
 function is_logged()
 {

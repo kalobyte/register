@@ -1,35 +1,8 @@
 <?php
 session_start();
 require_once "functions.php";
-/*
-register.php
-status  "already_registered" warning желтый Уведомление! Этот эл. адрес уже занят другим пользователем
-
-login.php
-status  "register_success" info  голубой Регистрация успешна
-status "empy_login_or_pass" danger красный Пустой логин или пароль
-status "wrong_login_or_pass" danger  красный Логин или пароль неверны
-status "logged_in" success зеленый залогинен
-*/
 
 if(is_logged()) redirect_to("main");
-
-if (isset($_POST['email']) && $_POST['password'])
-{
-
-        if(is_registered($_POST['email']))
-        {
-            set_flash_message("already_registered", "Уведомление! Этот эл. адрес уже занят другим пользователем.");
-            redirect_to("register");
-        }
-        else
-        {
-            add_user($_POST['email'], $_POST['password']);
-            set_flash_message("register_success", "Регистрация успешна");
-            redirect_to("login");
-        }
-
-}
 ?>
 
 
@@ -70,21 +43,14 @@ if (isset($_POST['email']) && $_POST['password'])
                                 <span class="page-logo-text mr-1">Учебный проект</span>
                             </a>
                         </div>
-                        <?php if(!is_logged()) : ?>
+
                         <span class="text-white opacity-50 ml-auto mr-2 hidden-sm-down">
                             Уже зарегистрированы?
                         </span>
                         <a href="login.php" class="btn-link text-white ml-auto ml-sm-0">
                             Login
                         </a>
-                        <?php else : ?>
-                        <span class="text-white opacity-50 ml-auto mr-2 hidden-sm-down">
 
-                        </span>
-                        <a href="login.php?logout" class="btn-link text-white ml-auto ml-sm-0">
-                            Logout
-                        </a>
-                        <?php endif; ?>
                     </div>
                 </div>
                 <div class="flex-1" style="background: url(img/svg/pattern-1.svg) no-repeat center bottom fixed; background-size: cover;">
@@ -104,7 +70,7 @@ if (isset($_POST['email']) && $_POST['password'])
                             <div class="col-xl-6 ml-auto mr-auto">
                                 <div class="card p-4 rounded-plus bg-faded">
                                     <?php display_flash_message()?>
-                                    <form id="js-login" novalidate="" action="register.php" method="post">
+                                    <form id="js-login" novalidate="" action="check_registration.php" method="post">
                                         <div class="form-group">
                                             <label class="form-label" for="emailverify">Email</label>
                                             <input type="email" name="email" id="emailverify" class="form-control" placeholder="Эл. адрес" required>
